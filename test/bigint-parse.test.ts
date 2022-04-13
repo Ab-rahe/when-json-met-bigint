@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/naming-convention */
+import BigNumber from "bignumber.js";
 import { JSONB as JSB } from "index";
 
 describe(`Testing native BigInt support: parse`, function () {
@@ -25,7 +26,8 @@ describe(`Testing native BigInt support: parse`, function () {
 
     it(`Should show JSONB does support forced parsing to native BigInt`, function (done) {
         const JSONB = JSB({
-            alwaysParseAsBigInt: true,
+            alwaysParseAsBig: true,
+            useNativeBigInt: true,
         });
         const obj = JSONB.parse(input);
         // big int
@@ -69,7 +71,7 @@ describe(`Testing native BigInt support: parse`, function () {
 
     it(`Should show JSONB does support native Bigint parse/stringify roundtrip when BigInt is forced`, function (done) {
         const JSONB = JSB({
-            alwaysParseAsBigInt: true,
+            alwaysParseAsBig: true,
         });
         const obj = JSONB.parse(input);
         const output = JSONB.stringify(obj);

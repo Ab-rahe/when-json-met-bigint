@@ -8,7 +8,9 @@ import {
     isNonNullObject,
     Cache,
 } from "lib";
+import type { BigNumber } from "bignumber.js";
 
+let bignumber: typeof BigNumber;
 const bigint = `bigint`;
 const number = `number`;
 
@@ -35,7 +37,11 @@ const ESCAPEE = {
 } as const;
 
 type StringOrNumberOrSymbol = string | number | symbol;
-type SimpleSchema = `number` | `bigint` | ((n: number | bigint) => `number` | `bigint`);
+type SimpleSchema =
+    | `number`
+    | `bigint`
+    | `bignumber`
+    | ((n: number | bigint | BigNumber) => `number` | `bigint` | `bignumber`);
 type InternalSchema =
     | SimpleSchema
     | (InternalSchema | null)[]
@@ -43,7 +49,7 @@ type InternalSchema =
 export type Schema<T = unknown> = unknown extends T
     ? InternalSchema
     : // eslint-disable-next-line @typescript-eslint/ban-types
-    T extends number | Number | bigint
+    T extends number | Number | bigint | BigNumber
     ? SimpleSchema
     : T extends (infer E)[]
     ? (Schema<E> | null)[]
@@ -89,6 +95,7 @@ type JsonValue =
     | JsonValue[]
     | string
     | number
+    | BigNumber
     | bigint
     | boolean
     | null;
@@ -115,7 +122,8 @@ export const newParse = (
         errorOnBigIntDecimalOrScientific: false,
         errorOnDuplicatedKeys: false,
         parseBigIntAsString: false,
-        alwaysParseAsBigInt: false, // Toggles whether all numbers should be BigInt
+        useNativeBigInt: false,
+        alwaysParseAsBig: false, // Toggles whether all numbers should be parsed as BigInt
         protoAction: preserve,
         constructorAction: preserve,
     };
@@ -135,8 +143,11 @@ export const newParse = (
         if (p_user_options.parseBigIntAsString === true) {
             p_options.parseBigIntAsString = true;
         }
-        if (p_user_options.alwaysParseAsBigInt === true) {
-            p_options.alwaysParseAsBigInt = true;
+        if (p_user_options.alwaysParseAsBig === true) {
+            p_options.alwaysParseAsBig = true;
+        }
+        if (p_user_options.useNativeBigInt === true) {
+            p_options.useNativeBigInt = true;
         }
 
         if (p_user_options.protoAction) {
@@ -348,7 +359,7 @@ export const newParse = (
         // TODO: Add test
         const cache = new Cache<
             string,
-            Map<SimpleSchema | undefined | null, number | bigint | string>
+            Map<SimpleSchema | undefined | null, number | bigint | string | BigNumber>
         >();
         return (schema?: SimpleSchema | null) => {
             // Parse a number value.
@@ -402,24 +413,31 @@ export const newParse = (
                     // Decimal or scientific notation
                     // cannot be BigInt, aka BigInt("1.79e+308") will throw.
                     const is_decimal_or_scientific = /[.eE]/.test(result_string);
+                    //eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                    if (!p_options.useNativeBigInt) bignumber = require(`bignumber.js`);
                     if (Number.isSafeInteger(result_number) || is_decimal_or_scientific) {
                         if (typeof schema === `function`) schema = schema(result_number);
+
                         cache_schema.set(
                             raw_schema,
-                            schema === number ||
-                                (!p_options.alwaysParseAsBigInt && schema !== bigint) ||
-                                (is_decimal_or_scientific &&
-                                    !p_options.errorOnBigIntDecimalOrScientific)
-                                ? result_number
-                                : is_decimal_or_scientific
+                            (p_options.useNativeBigInt || is_decimal_or_scientific) &&
+                                p_options.errorOnBigIntDecimalOrScientific
                                 ? pError(`Decimal and scientific notation cannot be bigint`)
-                                : BigInt(result_string),
+                                : schema === number ||
+                                  (!p_options.useNativeBigInt && schema !== bigint) ||
+                                  (is_decimal_or_scientific &&
+                                      !p_options.errorOnBigIntDecimalOrScientific)
+                                ? result_number
+                                : p_options.useNativeBigInt || schema === bigint
+                                ? BigInt(result_string)
+                                : new bignumber(result_string),
                         );
                     } else {
-                        let result_bigint;
+                        let result_big;
                         if (typeof schema === `function`) {
-                            result_bigint = BigInt(result_string);
-                            schema = schema(result_bigint);
+                            if (p_options.useNativeBigInt) result_big = BigInt(result_string);
+                            else result_big = new bignumber(result_string);
+                            schema = schema(result_big);
                         }
                         if (schema === number) cache_schema.set(raw_schema, result_number);
                         else
@@ -427,7 +445,7 @@ export const newParse = (
                                 raw_schema,
                                 p_options.parseBigIntAsString
                                     ? result_string
-                                    : result_bigint || BigInt(result_string),
+                                    : result_big || BigInt(result_string),
                             );
                     }
                 }

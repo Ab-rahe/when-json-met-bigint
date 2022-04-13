@@ -7,7 +7,7 @@ import { JSONB as JSB } from "index";
 describe(`Force bigint on decimal and scientific notation`, () => {
     it(`should throw when bigintOnDecimalAndScientificAction === 'error'`, () => {
         const JSONB = JSB({
-            alwaysParseAsBigInt: true,
+            alwaysParseAsBig: true,
             errorOnBigIntDecimalOrScientific: true,
         });
         expect(() => {
@@ -20,7 +20,7 @@ describe(`Force bigint on decimal and scientific notation`, () => {
 
     it(`should parse as number when bigintOnDecimalAndScientificAction === 'ignore'`, () => {
         const JSONB = JSB({
-            alwaysParseAsBigInt: true,
+            alwaysParseAsBig: true,
         });
         expect(typeof JSONB.parse(`1.23`)).toEqual(`number`);
         expect(typeof JSONB.parse(`1e23`)).toEqual(`number`);

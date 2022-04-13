@@ -82,5 +82,8 @@
         "ttypescript": "Required for ts-transform-paths",
         "pinst": "Workaround husky 'npm postinstall' problem when 'npm publish'",
         "syncyarnlock": "Sync yarn.lock to package.json after 'yarn upgrade'"
+    },
+    "dependencies": {
+        "bignumber.js": "^9.0.2"
     }
 }

@@ -25,7 +25,11 @@ export type JsonBigIntOptions = {
     /**
      * @default false
      */
-    alwaysParseAsBigInt?: boolean;
+    useNativeBigInt?: boolean;
+    /**
+     * @default false
+     */
+    alwaysParseAsBig?: boolean;
     /**
      * @default 'preserve'
      */

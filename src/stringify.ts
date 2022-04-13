@@ -1,4 +1,5 @@
 import { Cache, isNonNullObject } from "lib";
+import { BigNumber } from "bignumber.js";
 
 const isNonNullObjectWithToJSOnImplemented = <T>(
     o: T,
@@ -88,6 +89,9 @@ export const stringify = ((): Stringify => {
         // @ts-expect-error index array with string
         let value = object_or_array[key_or_index] as unknown;
 
+        const is_bignumber =
+            value != null && (value instanceof BigNumber || BigNumber.isBigNumber(value));
+
         // If the value has toJSON method, call it.
         if (isNonNullObjectWithToJSOnImplemented(value)) {
             value = value.toJSON();
@@ -102,7 +106,11 @@ export const stringify = ((): Stringify => {
         // What happens next depends on the value's type.
         switch (typeof value) {
             case `string`:
-                return quote(value);
+                if (is_bignumber) {
+                    return value;
+                } else {
+                    return quote(value);
+                }
             case `number`:
                 // JSON numbers must be finite. Encode non-finite numbers as null.
                 return Number.isFinite(value) ? value.toString() : `null`;

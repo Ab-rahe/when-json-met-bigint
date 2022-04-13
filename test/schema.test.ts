@@ -45,8 +45,8 @@ describe(`Testing parser schema`, () => {
         expect(typeof o5.a[2]).toEqual(`bigint`);
     });
 
-    it(`should overwrite alwaysParseAsBigInt`, () => {
-        const JSONB = JSB({ alwaysParseAsBigInt: true });
+    it(`should overwrite alwaysParseAsBig`, () => {
+        const JSONB = JSB({ alwaysParseAsBig: true });
         expect(typeof JSONB.parse(`123`, null, `number`)).toEqual(`number`);
     });
 });
