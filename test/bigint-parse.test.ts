@@ -2,7 +2,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/naming-convention */
-import BigNumber from "bignumber.js";
 import { JSONB as JSB } from "index";
 
 describe(`Testing native BigInt support: parse`, function () {

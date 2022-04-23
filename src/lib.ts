@@ -13,15 +13,11 @@ export type JsonBigIntOptions = {
     /**
      * @default false
      */
-    errorOnDuplicatedKeys?: boolean;
-    /**
-     * @default false
-     */
     strict?: boolean;
     /**
      * @default false
      */
-    parseBigIntAsString?: boolean;
+    storeAsString?: boolean;
     /**
      * @default false
      */
@@ -31,11 +27,11 @@ export type JsonBigIntOptions = {
      */
     alwaysParseAsBig?: boolean;
     /**
-     * @default 'preserve'
+     * @default 'error'
      */
     protoAction?: typeof PROTO_ACTIONS[number];
     /**
-     * @default 'preserve'
+     * @default 'error'
      */
     constructorAction?: typeof CONSTRUCTOR_ACTIONS[number];
 };

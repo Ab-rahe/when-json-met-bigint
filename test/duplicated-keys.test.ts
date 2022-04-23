@@ -18,7 +18,7 @@ describe(`Testing 'strict' option`, function () {
     });
 
     it(`Should show that the 'strict' option will fail-fast on duplicate keys`, function (done) {
-        const JSONeodk = JSB({ errorOnDuplicatedKeys: true });
+        const JSONeodk = JSB({ strict: true });
         let result = `before`;
         function tryParse() {
             result = JSONeodk.parse(dupkeys);

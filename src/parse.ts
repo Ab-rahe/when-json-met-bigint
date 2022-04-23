@@ -120,28 +120,25 @@ export const newParse = (
     // Default options.
     const p_options: JsonBigIntOptions = {
         errorOnBigIntDecimalOrScientific: false,
-        errorOnDuplicatedKeys: false,
-        parseBigIntAsString: false,
+        strict: false,
+        storeAsString: false,
         useNativeBigInt: false,
         alwaysParseAsBig: false, // Toggles whether all numbers should be parsed as BigInt
-        protoAction: preserve,
-        constructorAction: preserve,
+        protoAction: error,
+        constructorAction: error,
     };
 
     // If there are options, then use them to override the default options.
     // These checks are for JS users with no type checking.
     if (p_user_options) {
-        if (
-            p_user_options.strict === true ||
-            p_user_options.errorOnBigIntDecimalOrScientific === true
-        ) {
+        if (p_user_options.errorOnBigIntDecimalOrScientific === true) {
             p_options.errorOnBigIntDecimalOrScientific = true;
         }
-        if (p_user_options.strict === true || p_user_options.errorOnDuplicatedKeys === true) {
-            p_options.errorOnDuplicatedKeys = true;
+        if (p_user_options.strict === true) {
+            p_options.strict = true;
         }
-        if (p_user_options.parseBigIntAsString === true) {
-            p_options.parseBigIntAsString = true;
+        if (p_user_options.storeAsString === true) {
+            p_options.storeAsString = true;
         }
         if (p_user_options.alwaysParseAsBig === true) {
             p_options.alwaysParseAsBig = true;
@@ -231,10 +228,7 @@ export const newParse = (
                 pSkipWhite();
                 pCurrentCharIs(`:`);
                 pNext();
-                if (
-                    p_options.errorOnDuplicatedKeys === true &&
-                    Object.hasOwnProperty.call(result, key)
-                ) {
+                if (p_options.strict === true && Object.hasOwnProperty.call(result, key)) {
                     pError(`Duplicate key "${key}"`);
                 }
 
@@ -443,7 +437,7 @@ export const newParse = (
                         else
                             cache_schema.set(
                                 raw_schema,
-                                p_options.parseBigIntAsString
+                                p_options.storeAsString
                                     ? result_string
                                     : result_big || BigInt(result_string),
                             );
